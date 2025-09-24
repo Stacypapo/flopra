@@ -20,6 +20,7 @@ CREATE TABLE orders (
     total_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     shipping_address TEXT
+    warehouse_id BIGINT REFERENCES warehouses(warehouse_id)
 );
 
 -- =======================

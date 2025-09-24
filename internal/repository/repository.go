@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"database/sql"
 	"flowershy/internal/models"
 )
 
@@ -11,42 +12,69 @@ type User interface {
 	Delete(id int64) (int64, error)
 }
 
-// Модель заказов
-type Order struct {
+type Order interface {
 }
 
-// Модель товаров
-type Product struct {
+type Product interface {
+	Create(user *models.Product) (int64, error)
+	ReadById(id int64) (*models.Product, error)
+	ReadByName(name string) (*models.Product, error)
+	ReadBySKU(sku string) (*models.Product, error)
+	Update(user *models.Product) (int64, error)
+	Delete(id int64) (int64, error)
 }
 
-// Модель товаров в заказе
-type OrderItem struct {
+type OrderItem interface {
 }
 
-// Модель товаров в корзине
-type CartItem struct {
+type CartItem interface {
 }
 
-// Модель запросов пользователей
-type UserQuery struct {
+type UserQuery interface {
 }
 
-// Модель состава букетов
-type BouqetItem struct {
+type BouqetItem interface {
 }
 
-// Модель тэгов
-type Tag struct {
+type Tag interface {
 }
 
-// Модель тэгов к товару
-type ProductTag struct {
+type ProductTag interface {
 }
 
-// Модель склада
-type Warehouse struct {
+type Warehouse interface {
 }
 
-// Модель наличия
-type Inventory struct {
+type Inventory interface {
+}
+
+type Repository struct {
+	User
+	Order
+	Product
+	OrderItem
+	CartItem
+	UserQuery
+	BouqetItem
+	Tag
+	ProductTag
+	Warehouse
+	Inventory
+}
+
+// NewRepository создает новый экземпляр Repository.
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		User:       NewUserPostgres(db),
+		Order:      NewOrderPostgres(db),
+		Product:    NewProductPostgres(db),
+		OrderItem:  NewOrderItemPostgres(db),
+		CartItem:   NewCartItemPostgres(db),
+		UserQuery:  NewUserQueryPostgres(db),
+		BouqetItem: NewBouqetItemPostgres(db),
+		Tag:        NewTagPostgres(db),
+		ProductTag: NewProductTagPostgres(db),
+		Warehouse:  NewWarehousePostgres(db),
+		Inventory:  NewInventoryPostgres(db),
+	}
 }
