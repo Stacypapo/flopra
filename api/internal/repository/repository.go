@@ -18,8 +18,9 @@ type User interface {
 type Order interface {
 	Create(order *models.Order) (int64, error)
 	ReadById(id int64) (*models.Order, error)
-	ReadByUserId(userId int64, limit, offset int) ([]*models.Order, error)
-	ReadByWarehouseId(warehouseId int64, limit, offset int) ([]*models.Order, error)
+	ReadByUserId(userId int64, limit, offset int) ([]models.Order, error)
+	ReadByWarehouseId(warehouseId int64, limit, offset int) ([]models.Order, error)
+	ReadAll(limit, offset int) ([]models.Order, error)
 	Count() (int64, error)
 	CountByUserId(userId int64) (int64, error)
 	Update(order *models.Order) (int64, error)
@@ -29,20 +30,26 @@ type Order interface {
 type Product interface {
 	Create(product *models.Product) (int64, error)
 	ReadById(id int64) (*models.Product, error)
-	ReadByName(name string, limit, offset int) ([]*models.Product, error)
+	ReadByName(name string, limit, offset int) ([]models.Product, error)
 	ReadBySKU(sku string) (*models.Product, error)
-	ReadAll(limit, offset int) ([]*models.Product, error)
+	ReadAll(limit, offset int) ([]models.Product, error)
 	Count() (int64, error)
 	Update(product *models.Product) (int64, error)
 	Delete(id int64) (int64, error)
+	Search(query string, tags []int64) ([]models.Product, error)
 }
 
 type OrderItem interface {
+	Create(item *models.OrderItem) error
+	ReadByOrderId(orderId int64) ([]*models.OrderItem, error)
+	ReadByProductId(productId int64) ([]*models.OrderItem, error)
+	Delete(orderId, productId int64) error
+	DeleteByOrderId(orderId int64) error
 }
 
 type CartItem interface {
-	Add(item *models.CartItem) error
-	ReadByUserId(userId int64) ([]*models.CartItem, error)
+	Create(item *models.CartItem) error
+	ReadByUserId(userId int64) ([]models.CartItem, error)
 	UpdateQuantity(userId, productId int64, quantity int) error
 	Delete(userId, productId int64) error
 	ClearCart(userId int64) error
@@ -93,10 +100,11 @@ type Warehouse interface {
 
 type Inventory interface {
 	Add(item *models.Inventory) error
-	ReadByProductId(productId int64) ([]*models.Inventory, error)
-	ReadByWarehouseId(warehouseId int64) ([]*models.Inventory, error)
+	ReadByProductId(productId int64) ([]models.Inventory, error)
+	ReadByWarehouseId(warehouseId int64) ([]models.Inventory, error)
 	UpdateQuantity(item *models.Inventory) error
 	Delete(warehouseId, productId int64) error
+	ReserveStock(orderId int64, items map[int64]int) error
 }
 
 type Repository struct {

@@ -13,7 +13,7 @@ func NewOrderItemPostgres(db *sql.DB) *OrderItemPostgres {
 	return &OrderItemPostgres{db: db}
 }
 
-func (r *OrderItemPostgres) Add(item *models.OrderItem) error {
+func (r *OrderItemPostgres) Create(item *models.OrderItem) error {
 	query := `INSERT INTO order_items (order_id, product_id, quantity) VALUES ($1, $2, $3)`
 	_, err := r.db.Exec(query, item.OrderId, item.ProductId, item.Quantity)
 	return err

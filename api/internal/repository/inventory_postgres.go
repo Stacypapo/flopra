@@ -20,38 +20,38 @@ func (r *InventoryPostgres) Add(item *models.Inventory) error {
 	return err
 }
 
-func (r *InventoryPostgres) ReadByProductId(productId int64) ([]*models.Inventory, error) {
+func (r *InventoryPostgres) ReadByProductId(productId int64) ([]models.Inventory, error) {
 	query := `SELECT warehouse_id, product_id, quantity FROM inventory WHERE product_id = $1`
 	rows, err := r.db.Query(query, productId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Inventory
+	var res []models.Inventory
 	for rows.Next() {
 		var it models.Inventory
 		if err := rows.Scan(&it.WarehouseId, &it.ProductId, &it.Quantity); err != nil {
 			return nil, err
 		}
-		res = append(res, &it)
+		res = append(res, it)
 	}
 	return res, rows.Err()
 }
 
-func (r *InventoryPostgres) ReadByWarehouseId(warehouseId int64) ([]*models.Inventory, error) {
+func (r *InventoryPostgres) ReadByWarehouseId(warehouseId int64) ([]models.Inventory, error) {
 	query := `SELECT warehouse_id, product_id, quantity FROM inventory WHERE warehouse_id = $1`
 	rows, err := r.db.Query(query, warehouseId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Inventory
+	var res []models.Inventory
 	for rows.Next() {
 		var it models.Inventory
 		if err := rows.Scan(&it.WarehouseId, &it.ProductId, &it.Quantity); err != nil {
 			return nil, err
 		}
-		res = append(res, &it)
+		res = append(res, it)
 	}
 	return res, rows.Err()
 }
@@ -66,4 +66,36 @@ func (r *InventoryPostgres) Delete(warehouseId, productId int64) error {
 	query := `DELETE FROM inventory WHERE warehouse_id = $1 AND product_id = $2`
 	_, err := r.db.Exec(query, warehouseId, productId)
 	return err
+}
+
+func (r *InventoryPostgres) ReserveStock(orderId int64, items map[int64]int) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	for productId, qty := range items {
+		query := `UPDATE inventory SET reserved = reserved + $1, quantity = quantity - $1
+		          WHERE product_id = $2 AND quantity >= $1`
+		res, err := tx.Exec(query, qty, productId)
+		if err != nil {
+			return err
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rowsAffected == 0 {
+			return sql.ErrNoRows // Not enough stock
+		}
+	}
+	return nil
+
 }

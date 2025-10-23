@@ -49,9 +49,26 @@ func (s *UserService) Login(email, password string) (map[string]string, error) {
 }
 
 func (s *UserService) UserInfo(userId int64) (*models.User, error) {
-
+	return s.user_repo.ReadById(userId)
 }
 
 func (s *UserService) UpdateUser(user *models.User) (int64, error) {
+	return s.user_repo.Update(user)
+}
 
+func (s *UserService) CountUsers() (int64, error) {
+	return s.user_repo.Count()
+}
+
+func (s *UserService) ListUsers(limit, offset int) ([]models.User, error) {
+	users, err := s.user_repo.ReadAll(limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	var res []models.User
+	for _, u := range users {
+		u.Password = ""
+		res = append(res, *u)
+	}
+	return res, nil
 }

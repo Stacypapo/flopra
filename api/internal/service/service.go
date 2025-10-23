@@ -7,8 +7,8 @@ import (
 )
 
 type User interface {
-	Register(email, password string) (int64, error)
-	Login(email, password string) (string, error)
+	Register(name, email, phone_number, password string) (int64, error)
+	Login(email, password string) (map[string]string, error)
 	UserInfo(userId int64) (*models.User, error)
 	UpdateUser(user *models.User) (int64, error)
 	ListUsers(limit, offset int) ([]models.User, error)
@@ -18,8 +18,8 @@ type User interface {
 type Order interface {
 	CreateOrder(userId int64, items map[int64]int) (int64, error)
 	GetOrderById(orderId int64) (*models.Order, error)
-	GetOrdersByUserId(userId int64) ([]models.Order, error)
-	GetOrdersByWarehouseId(warehouseId int64) ([]models.Order, error)
+	GetOrdersByUserId(userId int64, limit, offset int) ([]models.Order, error)
+	GetOrdersByWarehouseId(warehouseId int64, limit, offset int) ([]models.Order, error)
 	GetAllOrders(limit, offset int) ([]models.Order, error)
 	CountOrders() (int64, error)
 	UpdateOrderStatus(orderId int64, status string) (int64, error)
@@ -29,7 +29,7 @@ type Order interface {
 type Product interface {
 	CreateProduct(product *models.Product) (int64, error)
 	GetProductById(productId int64) (*models.Product, error)
-	GetProductByName(name string) ([]models.Product, error)
+	GetProductsByName(name string, limit int, offset int) ([]models.Product, error)
 	GetProductBySKU(sku string) (*models.Product, error)
 	SearchProducts(query string, tags []int64) ([]models.Product, error) // удобный поиск
 	GetAllProducts(limit, offset int) ([]models.Product, error)
@@ -54,8 +54,9 @@ type Inventory interface {
 }
 
 type Ai interface {
-	GenerateBouquet(query string) (map[string]int, string, error)
-	CreateGeneratedBouquet(flowers map[string]int) (int64, error)
+	GenerateBouquetComposition(query string, warehouseId int64) (map[string]int, error)
+	GenerateBouquetImage(flowers map[string]int) (string, error)
+	CreateGeneratedBouquet(user_id int64, flowers map[string]int, url string) (int64, error)
 }
 
 type Tag interface {
@@ -86,20 +87,18 @@ type Service struct {
 	Tag
 	Bouquet
 	UserQuery
-	Warehouse
 }
 
-func NewService(repo *repository.Repository, jwt_manager *jwt.JWTManager) *Service {
+func NewService(repo *repository.Repository, jwt_manager *jwt.JWTManager, MLAPIURL string, MLAPIKey string) *Service {
 	return &Service{
 		User:      NewUserService(repo.User, jwt_manager),
 		Order:     NewOrderService(repo.Order, repo.OrderItem, repo.Inventory),
 		Product:   NewProductService(repo.Product, repo.ProductTag),
 		Cart:      NewCartService(repo.CartItem),
 		Inventory: NewInventoryService(repo.Inventory),
-		Ai:        NewAiService(repo.Inventory, repo.Product),
-		Tag:       NewTagService(repo.Tag),
-		Bouquet:   NewBouquetService(repo.BouquetItem),
-		UserQuery: NewUserQueryService(repo.UserQuery),
-		Warehouse: NewWarehouseService(repo.Warehouse),
+		Ai:        NewAiService(repo.Inventory, repo.Product, MLAPIURL, MLAPIKey),
+		//Tag:       NewTagService(repo.Tag),
+		//Bouquet:   NewBouquetService(repo.BouquetItem),
+		//UserQuery: NewUserQueryService(repo.UserQuery),
 	}
 }

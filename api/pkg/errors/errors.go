@@ -25,4 +25,5 @@ var (
 	ErrInvalidInput    = New("INVALID_INPUT", "invalid input provided")
 	ErrInvalidPassword = New("INVALID_PASSWORD", "invalid password")
 	ErrInvalidToken    = New("INVALID_TOKEN", "invalid token")
+	ErrEmptyQuery      = New("EMPTY_QUERY", "empty query")
 )

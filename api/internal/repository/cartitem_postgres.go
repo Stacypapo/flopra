@@ -13,7 +13,7 @@ func NewCartItemPostgres(db *sql.DB) *CartItemPostgres {
 	return &CartItemPostgres{db: db}
 }
 
-func (r *CartItemPostgres) Add(item *models.CartItem) error {
+func (r *CartItemPostgres) Create(item *models.CartItem) error {
 	// upsert: если уже есть — обновляем количество
 	query := `INSERT INTO cart_items (user_id, product_id, quantity) VALUES ($1, $2, $3)
 	          ON CONFLICT (user_id, product_id) DO UPDATE SET quantity = EXCLUDED.quantity`
@@ -21,20 +21,20 @@ func (r *CartItemPostgres) Add(item *models.CartItem) error {
 	return err
 }
 
-func (r *CartItemPostgres) ReadByUserId(userId int64) ([]*models.CartItem, error) {
+func (r *CartItemPostgres) ReadByUserId(userId int64) ([]models.CartItem, error) {
 	query := `SELECT user_id, product_id, quantity FROM cart_items WHERE user_id = $1`
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.CartItem
+	var res []models.CartItem
 	for rows.Next() {
-		var it models.CartItem
-		if err := rows.Scan(&it.UserId, &it.ProductId, &it.Quantity); err != nil {
+		var item models.CartItem
+		if err := rows.Scan(&item.UserId, &item.ProductId, &item.Quantity); err != nil {
 			return nil, err
 		}
-		res = append(res, &it)
+		res = append(res, item)
 	}
 	return res, rows.Err()
 }

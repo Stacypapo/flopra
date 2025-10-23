@@ -5,6 +5,8 @@ import (
 	"errors"
 	"flowershy/internal/models"
 	"time"
+
+	"github.com/lib/pq"
 )
 
 type ProductPostgres struct {
@@ -44,20 +46,20 @@ func (r *ProductPostgres) ReadById(id int64) (*models.Product, error) {
 	return &p, nil
 }
 
-func (r *ProductPostgres) ReadByName(name string, limit, offset int) ([]*models.Product, error) {
+func (r *ProductPostgres) ReadByName(name string, limit, offset int) ([]models.Product, error) {
 	query := `SELECT product_id, sku, name, description, price, created_at, url FROM products WHERE name ILIKE '%' || $1 || '%' ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 	rows, err := r.db.Query(query, name, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Product
+	var res []models.Product
 	for rows.Next() {
 		var p models.Product
 		if err := rows.Scan(&p.ProductId, &p.SKU, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.URL); err != nil {
 			return nil, err
 		}
-		res = append(res, &p)
+		res = append(res, p)
 	}
 	return res, rows.Err()
 }
@@ -76,20 +78,20 @@ func (r *ProductPostgres) ReadBySKU(sku string) (*models.Product, error) {
 	return &p, nil
 }
 
-func (r *ProductPostgres) ReadAll(limit, offset int) ([]*models.Product, error) {
+func (r *ProductPostgres) ReadAll(limit, offset int) ([]models.Product, error) {
 	query := `SELECT product_id, sku, name, description, price, created_at, url FROM products ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Product
+	var res []models.Product
 	for rows.Next() {
 		var p models.Product
 		if err := rows.Scan(&p.ProductId, &p.SKU, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.URL); err != nil {
 			return nil, err
 		}
-		res = append(res, &p)
+		res = append(res, p)
 	}
 	return res, rows.Err()
 }
@@ -117,4 +119,31 @@ func (r *ProductPostgres) Delete(id int64) (int64, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (r *ProductPostgres) Search(queryStr string, tags []int64) ([]models.Product, error) {
+	query := `SELECT DISTINCT p.product_id, p.sku, p.name, p.description, p.price, p.created_at, p.url
+	          FROM products p
+			  LEFT JOIN product_tags pt ON p.product_id = pt.product_id
+				WHERE (p.name ILIKE '%' || $1 || '%' OR p.description ILIKE '%' || $1 || '%')`
+	args := []interface{}{queryStr}
+	if len(tags) > 0 {
+		query += ` AND pt.tag_id = ANY($2)`
+		args = append(args, pq.Array(tags))
+	}
+	query += ` ORDER BY p.created_at DESC`
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var res []models.Product
+	for rows.Next() {
+		var p models.Product
+		if err := rows.Scan(&p.ProductId, &p.SKU, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.URL); err != nil {
+			return nil, err
+		}
+		res = append(res, p)
+	}
+	return res, rows.Err()
 }

@@ -5,6 +5,7 @@ import (
 	"flowershy/internal/handler"
 	"flowershy/internal/repository"
 	"flowershy/internal/service"
+	"flowershy/pkg/jwt"
 	"log"
 	"net/http"
 
@@ -16,7 +17,7 @@ import (
 // @description API для управления транзакциями и кошельками
 // @host localhost:8080
 // @BasePath /
-func run() {
+func Run() {
 	config, err := configs.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -28,8 +29,9 @@ func run() {
 	if err := repository.Migrate(db); err != nil {
 		log.Fatal(err)
 	}
+	jwt_manager := jwt.NewJWTManager(config.JWTSecretKey, config.AccessTokenTTL, config.RefreshTokenTTL)
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	services := service.NewService(repos, jwt_manager, config.MLAPIURL, config.MLAPIKey)
 	handlers := handler.NewHandler(services)
 
 	log.Println("Server started on :8080")

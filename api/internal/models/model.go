@@ -92,4 +92,5 @@ type Inventory struct {
 	WarehouseId int64 `json:"warehouse_id"`
 	ProductId   int64 `json:"product_id"`
 	Quantity    int   `json:"quantity"`
+	Reserved    int   `json:"reserved"`
 }

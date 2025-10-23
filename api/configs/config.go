@@ -19,6 +19,8 @@ type Config struct {
 	JWTSecretKey    string
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+	MLAPIURL        string
+	MLAPIKey        string
 }
 
 // LoadConfig загружает конфигурацию из .env файла или переменных окружения

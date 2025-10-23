@@ -1,13 +1,7 @@
 package main
 
 import (
-	"flowershy/configs"
-	"flowershy/internal/handler"
-	"flowershy/internal/repository"
-	"flowershy/internal/service"
-	"flowershy/pkg/jwt"
-	"log"
-	"net/http"
+	"flowershy/internal/app"
 
 	_ "flowershy/docs"
 )
@@ -18,23 +12,5 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	config, err := configs.LoadConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	db, err := repository.NewPostgresDB(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := repository.Migrate(db); err != nil {
-		log.Fatal(err)
-	}
-
-	jwt_manager := jwt.NewJWTManager(config.JWTSecretKey, config.AccessTokenTTL, config.RefreshTokenTTL)
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos,jwt_manager)
-	handlers := handler.NewHandler(services)
-
-	log.Println("Server started on :8080")
-	log.Fatal(http.ListenAndServe(":8080", handlers.InitRoutes()))
+	app.Run()
 }

@@ -44,38 +44,56 @@ func (r *OrderPostgres) ReadById(id int64) (*models.Order, error) {
 	return &o, nil
 }
 
-func (r *OrderPostgres) ReadByUserId(userId int64, limit, offset int) ([]*models.Order, error) {
+func (r *OrderPostgres) ReadByUserId(userId int64, limit, offset int) ([]models.Order, error) {
 	query := `SELECT order_id, user_id, status, total_amount, created_at, shipping_address, warehouse_id FROM orders WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 	rows, err := r.db.Query(query, userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Order
+	var res []models.Order
 	for rows.Next() {
 		var o models.Order
 		if err := rows.Scan(&o.OrderId, &o.UserId, &o.Status, &o.TotalAmount, &o.CreatedAt, &o.ShippingAddress, &o.WarehouseId); err != nil {
 			return nil, err
 		}
-		res = append(res, &o)
+		res = append(res, o)
 	}
 	return res, rows.Err()
 }
 
-func (r *OrderPostgres) ReadByWarehouseId(warehouseId int64, limit, offset int) ([]*models.Order, error) {
+func (r *OrderPostgres) ReadByWarehouseId(warehouseId int64, limit, offset int) ([]models.Order, error) {
 	query := `SELECT order_id, user_id, status, total_amount, created_at, shipping_address, warehouse_id FROM orders WHERE warehouse_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 	rows, err := r.db.Query(query, warehouseId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Order
+	var res []models.Order
 	for rows.Next() {
 		var o models.Order
 		if err := rows.Scan(&o.OrderId, &o.UserId, &o.Status, &o.TotalAmount, &o.CreatedAt, &o.ShippingAddress, &o.WarehouseId); err != nil {
 			return nil, err
 		}
-		res = append(res, &o)
+		res = append(res, o)
+	}
+	return res, rows.Err()
+}
+
+func (r *OrderPostgres) ReadAll(limit, offset int) ([]models.Order, error) {
+	query := `SELECT order_id, user_id, status, total_amount, created_at, shipping_address, warehouse_id FROM orders ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var res []models.Order
+	for rows.Next() {
+		var o models.Order
+		if err := rows.Scan(&o.OrderId, &o.UserId, &o.Status, &o.TotalAmount, &o.CreatedAt, &o.ShippingAddress, &o.WarehouseId); err != nil {
+			return nil, err
+		}
+		res = append(res, o)
 	}
 	return res, rows.Err()
 }

@@ -115,5 +115,7 @@ CREATE TABLE inventory (
     warehouse_id BIGINT NOT NULL REFERENCES warehouses(warehouse_id) ON DELETE CASCADE,
     product_id BIGINT NOT NULL REFERENCES products(product_id) ON DELETE CASCADE,
     quantity INT NOT NULL CHECK (quantity >= 0),
+    reserved INT NOT NULL DEFAULT 0 CHECK (reserved >= 0),
+     CHECK (quantity >= reserved),
     PRIMARY KEY (warehouse_id, product_id)
 );
