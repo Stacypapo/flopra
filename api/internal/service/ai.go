@@ -33,6 +33,9 @@ type mlRequest struct {
 	Inventory  []models.Inventory     `json:"inventory"`
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 }
+//GenerateBouquetComposition(query string, warehouseId int64) (map[string]int, error)
+//GenerateBouquetImage(flowers map[string]int) (string, error)
+//CreateGeneratedBouquet(user_id int64, flowers map[string]int, url string) (int64, error)
 
 func (s *AiService) GenerateBouquetComposition(query string, warehouseId int64) (map[string]int, error) {
 	if query == "" {

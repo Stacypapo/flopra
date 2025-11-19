@@ -36,20 +36,20 @@ func (r *WarehousePostgres) ReadById(id int64) (*models.Warehouse, error) {
 	return &w, nil
 }
 
-func (r *WarehousePostgres) ReadAll(limit, offset int) ([]*models.Warehouse, error) {
+func (r *WarehousePostgres) ReadAll(limit, offset int) ([]models.Warehouse, error) {
 	query := `SELECT warehouse_id, name, address FROM warehouses ORDER BY warehouse_id LIMIT $1 OFFSET $2`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Warehouse
+	var res []models.Warehouse
 	for rows.Next() {
 		var w models.Warehouse
 		if err := rows.Scan(&w.WarehouseId, &w.Name, &w.Address); err != nil {
 			return nil, err
 		}
-		res = append(res, &w)
+		res = append(res, w)
 	}
 	return res, rows.Err()
 }

@@ -27,7 +27,7 @@ type Config struct {
 func LoadConfig() (Config, error) {
 	_ = godotenv.Load()
 
-	requiredVars := []string{"DB_HOST", "DB_PORT", "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "JWT_SECRETKEY"}
+	requiredVars := []string{"DB_HOST", "DB_PORT", "DB_USERNAME", "DB_PASSWORD", "DB_NAME", "JWT_SECRETKEY", "ML_API_URL", "ML_API_KEY"}
 	for _, v := range requiredVars {
 		if os.Getenv(v) == "" {
 			log.Printf("Warning: Environment variable %s is not set\n", v)
@@ -52,6 +52,8 @@ func LoadConfig() (Config, error) {
 		JWTSecretKey:    getEnv("JWT_SECRETKEY", "mysecret"),
 		AccessTokenTTL:  accessTokenTTL,
 		RefreshTokenTTL: refreshTokenTTL,
+		MLAPIURL:        getEnv("ML_API_URL", "http://localhost:5000"),
+		MLAPIKey:        getEnv("ML_API_KEY", "secret_ml_api_key"),
 	}, nil
 }
 

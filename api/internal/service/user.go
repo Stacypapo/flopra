@@ -56,6 +56,10 @@ func (s *UserService) UpdateUser(user *models.User) (int64, error) {
 	return s.user_repo.Update(user)
 }
 
+func (s *UserService) DeleteUser(id int64) (int64, error) {
+	return s.user_repo.Delete(id)
+}
+
 func (s *UserService) CountUsers() (int64, error) {
 	return s.user_repo.Count()
 }

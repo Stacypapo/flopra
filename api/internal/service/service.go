@@ -13,6 +13,7 @@ type User interface {
 	UpdateUser(user *models.User) (int64, error)
 	ListUsers(limit, offset int) ([]models.User, error)
 	CountUsers() (int64, error)
+	DeleteUser(id int64) (int64, error)
 }
 
 type Order interface {
@@ -31,7 +32,7 @@ type Product interface {
 	GetProductById(productId int64) (*models.Product, error)
 	GetProductsByName(name string, limit int, offset int) ([]models.Product, error)
 	GetProductBySKU(sku string) (*models.Product, error)
-	SearchProducts(query string, tags []int64) ([]models.Product, error) // удобный поиск
+	SearchProducts(query string, tags []int64) ([]models.Product, error)
 	GetAllProducts(limit, offset int) ([]models.Product, error)
 	CountProducts() (int64, error)
 	UpdateProduct(product *models.Product) (int64, error)
@@ -60,9 +61,12 @@ type Ai interface {
 }
 
 type Tag interface {
-	AddTag(name string) (int64, error)
+	AddTag(name, prodtype, color string) (int64, error)
 	GetTagById(tagId int64) (*models.Tag, error)
-	GetAllTags() ([]models.Tag, error)
+	GetAllTags(limit, offset int) ([]models.Tag, error)
+	ApplyTagToProduct(tagId, productId int64) error
+	RemoveTagFromProduct(tagId, productId int64) error
+	GetTagsByProductId(productId int64) ([]models.Tag, error)
 }
 
 type Bouquet interface {
@@ -93,11 +97,11 @@ func NewService(repo *repository.Repository, jwt_manager *jwt.JWTManager, MLAPIU
 	return &Service{
 		User:      NewUserService(repo.User, jwt_manager),
 		Order:     NewOrderService(repo.Order, repo.OrderItem, repo.Inventory),
-		Product:   NewProductService(repo.Product, repo.ProductTag),
+		Product:   NewProductService(repo.Product),
 		Cart:      NewCartService(repo.CartItem),
 		Inventory: NewInventoryService(repo.Inventory),
 		Ai:        NewAiService(repo.Inventory, repo.Product, MLAPIURL, MLAPIKey),
-		//Tag:       NewTagService(repo.Tag),
+		Tag:       NewTagService(repo.Tag, repo.ProductTag),
 		//Bouquet:   NewBouquetService(repo.BouquetItem),
 		//UserQuery: NewUserQueryService(repo.UserQuery),
 	}

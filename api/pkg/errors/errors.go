@@ -2,22 +2,19 @@ package errors
 
 import "fmt"
 
-// AppError — кастомная ошибка с кодом
 type AppError struct {
-	Code    string // например, "USER_NOT_FOUND"
-	Message string // человекочитаемое сообщение
+	Code    string 
+	Message string 
 }
 
 func (e *AppError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-// Фабрики ошибок
 func New(code, msg string) *AppError {
 	return &AppError{Code: code, Message: msg}
 }
 
-// Примеры "преднастроенных" ошибок
 var (
 	ErrUserNotFound    = New("USER_NOT_FOUND", "user not found")
 	ErrProductNotFound = New("PRODUCT_NOT_FOUND", "product not found")

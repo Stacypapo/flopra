@@ -75,7 +75,7 @@ type BouquetItem interface {
 type Tag interface {
 	Create(tag *models.Tag) (int64, error)
 	ReadById(id int64) (*models.Tag, error)
-	ReadAll(limit, offset int) ([]*models.Tag, error)
+	ReadAll(limit, offset int) ([]models.Tag, error)
 	Count() (int64, error)
 	Update(tag *models.Tag) (int64, error)
 	Delete(id int64) (int64, error)
@@ -83,8 +83,8 @@ type Tag interface {
 
 type ProductTag interface {
 	Add(pt *models.ProductTag) error
-	ReadByProductId(productId int64) ([]*models.Tag, error)
-	ReadByTagId(tagId int64) ([]*models.Product, error)
+	ReadByProductId(productId int64) ([]models.Tag, error)
+	ReadByTagId(tagId int64) ([]models.Product, error)
 	Delete(tagId, productId int64) error
 	DeleteByProductId(productId int64) error
 }
@@ -92,7 +92,7 @@ type ProductTag interface {
 type Warehouse interface {
 	Create(warehouse *models.Warehouse) (int64, error)
 	ReadById(id int64) (*models.Warehouse, error)
-	ReadAll(limit, offset int) ([]*models.Warehouse, error)
+	ReadAll(limit, offset int) ([]models.Warehouse, error)
 	Count() (int64, error)
 	Update(warehouse *models.Warehouse) (int64, error)
 	Delete(id int64) (int64, error)

@@ -36,20 +36,20 @@ func (r *TagPostgres) ReadById(id int64) (*models.Tag, error) {
 	return &t, nil
 }
 
-func (r *TagPostgres) ReadAll(limit, offset int) ([]*models.Tag, error) {
+func (r *TagPostgres) ReadAll(limit, offset int) ([]models.Tag, error) {
 	query := `SELECT tag_id, name, type, color_hex FROM tags ORDER BY tag_id LIMIT $1 OFFSET $2`
 	rows, err := r.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Tag
+	var res []models.Tag
 	for rows.Next() {
 		var t models.Tag
 		if err := rows.Scan(&t.TagId, &t.Name, &t.Type, &t.ColorHex); err != nil {
 			return nil, err
 		}
-		res = append(res, &t)
+		res = append(res, t)
 	}
 	return res, rows.Err()
 }

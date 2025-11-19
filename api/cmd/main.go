@@ -2,8 +2,6 @@ package main
 
 import (
 	"flowershy/internal/app"
-
-	_ "flowershy/docs"
 )
 
 // @title FlowerShy API

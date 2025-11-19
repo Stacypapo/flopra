@@ -7,11 +7,10 @@ import (
 
 type ProductService struct {
 	productRepo repository.Product
-	tagRepo     repository.ProductTag
 }
 
-func NewProductService(p repository.Product, pt repository.ProductTag) *ProductService {
-	return &ProductService{productRepo: p, tagRepo: pt}
+func NewProductService(p repository.Product) *ProductService {
+	return &ProductService{productRepo: p}
 }
 
 func (s *ProductService) CreateProduct(p *models.Product) (int64, error) {

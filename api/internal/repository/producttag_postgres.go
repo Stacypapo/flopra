@@ -19,38 +19,38 @@ func (r *ProductTagPostgres) Add(pt *models.ProductTag) error {
 	return err
 }
 
-func (r *ProductTagPostgres) ReadByProductId(productId int64) ([]*models.Tag, error) {
+func (r *ProductTagPostgres) ReadByProductId(productId int64) ([]models.Tag, error) {
 	query := `SELECT t.tag_id, t.name, t.type, t.color_hex FROM tags t JOIN product_tags pt ON t.tag_id = pt.tag_id WHERE pt.product_id = $1`
 	rows, err := r.db.Query(query, productId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Tag
+	var res []models.Tag
 	for rows.Next() {
 		var t models.Tag
 		if err := rows.Scan(&t.TagId, &t.Name, &t.Type, &t.ColorHex); err != nil {
 			return nil, err
 		}
-		res = append(res, &t)
+		res = append(res, t)
 	}
 	return res, rows.Err()
 }
 
-func (r *ProductTagPostgres) ReadByTagId(tagId int64) ([]*models.Product, error) {
+func (r *ProductTagPostgres) ReadByTagId(tagId int64) ([]models.Product, error) {
 	query := `SELECT p.product_id, p.sku, p.name, p.description, p.price, p.created_at, p.url FROM products p JOIN product_tags pt ON p.product_id = pt.product_id WHERE pt.tag_id = $1`
 	rows, err := r.db.Query(query, tagId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var res []*models.Product
+	var res []models.Product
 	for rows.Next() {
 		var p models.Product
 		if err := rows.Scan(&p.ProductId, &p.SKU, &p.Name, &p.Description, &p.Price, &p.CreatedAt, &p.URL); err != nil {
 			return nil, err
 		}
-		res = append(res, &p)
+		res = append(res, p)
 	}
 	return res, rows.Err()
 }

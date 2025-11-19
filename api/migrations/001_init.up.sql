@@ -10,7 +10,14 @@ CREATE TABLE users (
     role TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
+-- =======================
+-- Warehouses
+-- =======================
+CREATE TABLE warehouses (
+    warehouse_id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    address TEXT
+);
 -- =======================
 -- Orders
 -- =======================
@@ -20,7 +27,7 @@ CREATE TABLE orders (
     status TEXT NOT NULL,
     total_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    shipping_address TEXT
+    shipping_address TEXT,
     warehouse_id BIGINT REFERENCES warehouses(warehouse_id)
 );
 
@@ -99,14 +106,7 @@ CREATE TABLE product_tags (
     PRIMARY KEY (tag_id, product_id)
 );
 
--- =======================
--- Warehouses
--- =======================
-CREATE TABLE warehouses (
-    warehouse_id BIGSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    address TEXT
-);
+
 
 -- =======================
 -- Inventory
